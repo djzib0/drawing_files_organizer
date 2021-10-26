@@ -12,39 +12,49 @@ def check_file_extension_len(file_name):
 
 def create_key(list_):
     """Creates string key with coordinates for copying files."""
-    key = ''
-    for item in list_:
-        key += str(item)
+    key = str(list_)
     return key
 
 def create_short_key(list_):
-    key = ''
-    for item in list_[0:-1]:
-        key += str(item)
+    key = str(list_[0:-1])
     return key
 
-
-drawings = []
-EXTENSIONS = ['pdf', 'docx']
-files_to_copy = []
-file_list = os.listdir()
-
-book = openpyxl.load_workbook('input.xlsx')
+# open excel file
+book = openpyxl.load_workbook('input2.xlsx')
 sheet = book.active
+last_row = int(sheet.max_row) # sets last row with data
+
+drawings = [] # list keeps names of files to be copied
+EXTENSIONS = ['pdf', 'dwg'] # list of file extensions (TO BE MODIFIED)
+files_to_copy = []
+file_list = os.listdir() # creates file list in folder
 
 checked_row = [0]
 below_row = [0]
 current_path = os.getcwd()
-paths = {'0': current_path}
-
-paths_short = {'0': current_path}
+paths = {'[0]': current_path}
+paths_short = {'[0]': current_path}
 
 part_col = 7  # ta wartość będzie domyślna, ale z możliwością modyfikacji, podaje numer kolumny z part number
 name_col = 8 # ta wartość będzie domyślna, ale z możliwością modyfikacji, podaje numer kolumny z nazwą części
-row_counter = 2
-col_counter = 1
+row_counter = 2 # starting row
+col_counter = 1 # starting column
 key = ''
-while row_counter < 28: # ustawić później max_row + 1
+
+# adding part/drawing numbers to the list
+for row in sheet.iter_rows(min_col=part_col, max_col=part_col):
+    for cell in row:
+        drawings.append(cell.value)
+
+# creating list of files valid to be copied
+
+for drawing in drawings:
+    for file in file_list:
+        if drawing in file:
+            files_to_copy.append(file)
+
+# analizing excel file - creating paths for folders and subfolders
+while row_counter < last_row:
     checked_row = [0]
     below_row = [0]
     for col in range(1, 6):
@@ -70,13 +80,42 @@ while row_counter < 28: # ustawić później max_row + 1
         part_name = str(sheet.cell(row=row_counter, column=name_col).value)
 
         print(f'checked_row to: {checked_row}')
-        #print(f'short key to {short_key}')
         if key not in paths.keys():
             paths[key] = str(paths[short_key]) + '\\' + part_number + ' ' + part_name
+
 
     row_counter += 1
     checked_row = []
     below_row = []
 
-for k, v in paths.items():
-    print(f' {k} \n {v}')
+# creating folders
+for i, path in paths.items():
+    print(f'to jest klucz {i}')
+    print(f'to jest ścieżka {path}')
+    try:
+        if i != '[0]':
+            os.makedirs(str(path))
+        else:
+            print('to jest katalog startowy')
+    except FileExistsError:
+        print('Ten folder już istnieje')
+
+# copying files
+row_counter = 2
+checked_row = [0]
+while row_counter < last_row:
+    for col in range(1, 6):
+        if sheet.cell(row=row_counter, column=col).value != None: # sprawdza czy wartość komórki jest None
+            checked_row.append(sheet.cell(row=row_counter, column=col).value) # jeżeli nie to dodaje do listy
+    row_counter += 1
+
+#for k, v in paths.items():
+#    print(f' {k} \n {v}')
+
+# path length can't be longer than 256 characters
+#length_check_list = []
+#for v in paths.values():
+#    length_check_list.append(v)
+
+#print(len(max(length_check_list, key=len)))
+#print(files_to_copy)
