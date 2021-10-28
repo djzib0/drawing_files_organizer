@@ -32,8 +32,8 @@ file_list = os.listdir() # creates file list in folder
 checked_row = [0]
 below_row = [0]
 current_path = os.getcwd()
-paths = {'[0]': current_path}
-paths_short = {'[0]': current_path}
+paths = {'[0]': current_path + '\\new_folder'}
+paths_short = {'[0]': current_path + '\\new_folder'}
 
 part_col = 7  # ta wartość będzie domyślna, ale z możliwością modyfikacji, podaje numer kolumny z part number
 name_col = 8 # ta wartość będzie domyślna, ale z możliwością modyfikacji, podaje numer kolumny z nazwą części
@@ -42,16 +42,13 @@ col_counter = 1 # starting column
 key = ''
 
 # adding part/drawing numbers to the list
-for row in sheet.iter_rows(min_col=part_col, max_col=part_col):
-    for cell in row:
-        drawings.append(cell.value)
 
 # creating list of files valid to be copied
 
-for drawing in drawings:
-    for file in file_list:
-        if drawing in file:
-            files_to_copy.append(file)
+for file in file_list:
+        files_to_copy.append(file)
+
+print(files_to_copy)
 
 # analizing excel file - creating paths for folders and subfolders
 while row_counter < last_row:
@@ -85,7 +82,7 @@ while row_counter < last_row:
 
 
     row_counter += 1
-    checked_row = []
+    #checked_row = []
     below_row = []
 
 # creating folders
@@ -103,10 +100,26 @@ for i, path in paths.items():
 # copying files
 row_counter = 2
 checked_row = [0]
+
+print(paths)
+print(paths_short)
 while row_counter < last_row:
+    checked_row = [0]
     for col in range(1, 6):
         if sheet.cell(row=row_counter, column=col).value != None: # sprawdza czy wartość komórki jest None
             checked_row.append(sheet.cell(row=row_counter, column=col).value) # jeżeli nie to dodaje do listy
+    drawing = sheet.cell(row_counter, part_col).value
+    print(f'to jest {drawing}')
+    for file in files_to_copy:
+        if drawing in file:
+            print("tak jest w liście")
+            to_be_copied = str(current_path) + '\\' + str(file)
+    destination_folder = paths[create_short_key(checked_row)]
+    print(f'to jest to be_copied {to_be_copied}')
+    print(f'to jest kopiowany file {drawing}')
+    print(str(current_path) + '\\' + str(file))
+    shutil.copy(to_be_copied, destination_folder)
+
     row_counter += 1
 
 #for k, v in paths.items():
