@@ -364,7 +364,7 @@ class MainPage(QWidget):
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
             msg.setText(f"Oops")
-            msg.setInformativeText('Gibony coś popsuły. Sprawdź dane.')
+            msg.setInformativeText('Gibony chyba coś popsuły.\n Sprawdź dane lub plik wejściowy.')
             msg.setWindowTitle("Error")
             msg.exec_()
 
